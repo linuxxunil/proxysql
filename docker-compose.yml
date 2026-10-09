@@ -1,0 +1,39 @@
+# 运行专用：只启动，不建置。镜像须事先建好（见 docker-compose.build.yml / Makefile）。
+# 本机默认用 proxysql:arm64；x64 机器请设 PROXYSQL_IMAGE=proxysql:amd64
+# 或 registry 地址（可写进 .env，见 .env.example）。
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 10
+
+  proxysql:
+    image: ${PROXYSQL_IMAGE:-proxysql:arm64}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # DSN is env-only (single home: .env, gitignored). Compose only passes
+    # it through — no default here; missing/empty = startup fails fast.
+    environment:
+      PROXYSQL_DB__DSN: "${PROXYSQL_DB__DSN}"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+
+  nginx:
+    image: nginx:latest
+    depends_on:
+      - proxysql
+    ports:
+      - "8081:80"
+    volumes:
+      - ./nginx/example.conf:/etc/nginx/conf.d/default.conf:ro

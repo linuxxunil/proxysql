@@ -1,0 +1,9 @@
+# 建置专用：只建置，不运行（本机原生架构）。
+# 用法：make build，或 docker compose -f docker-compose.build.yml build
+# 跨架构请用：make build-amd64 / make build-arm64（见 Makefile）。
+services:
+  proxysql:
+    image: ${PROXYSQL_IMAGE:-proxysql:arm64}
+    build:
+      context: .
+      dockerfile: Dockerfile

@@ -1,0 +1,25 @@
+server:
+  listen: ":8080"
+  base_path: "/proxysql"
+  read_timeout: 65s
+  write_timeout: 65s
+  max_body_bytes: 1048576
+db:
+  pool_min: 2
+  pool_max: 20
+  acquire_timeout: 5s
+  idle_timeout: 5m
+  max_lifetime: 30m
+  health_check_period: 30s
+query:
+  default_timeout: 60s
+  max_timeout: 120s
+  max_rows: 10000
+  allow_raw_sql: true
+  allow_multi_statements: false
+  allowed_statements: ["SELECT", "INSERT", "UPDATE", "CREATE"]
+auth:
+  api_keys: []
+log:
+  level: info
+  log_sql_text: false
